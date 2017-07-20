@@ -66,7 +66,6 @@ public class JdbcNaamahUserDao implements NaamahUserDao {
 			}			
 			
 			SqlParameterSource parameters = new MapSqlParameterSource()				
-					.addValue(USER_ID_COLUMN_DB, userId)
 					.addValue(CHMP_COLUMN_DB, naamahUser.getCustomHomepage())
 					.addValue(MAIL_COLUMN_DB, StringUtils.hasText(naamahUser.getEmail()) && naamahUser.getEmail().length() > 100 ? naamahUser.getEmail().substring(0, 99) : naamahUser.getEmail())
 					.addValue(PASW_COLUMN_DB, naamahUser.getPassword())
@@ -148,7 +147,7 @@ public class JdbcNaamahUserDao implements NaamahUserDao {
 	
 	// Injection
 	public void setDataSource(final DataSource dataSource) {		
-		this.insertNaamahUser = new SimpleJdbcInsert(dataSource).withTableName(NAAMAH_USER_TABLE_NAME);
+		this.insertNaamahUser = new SimpleJdbcInsert(dataSource).withTableName(NAAMAH_USER_TABLE_NAME).usingGeneratedKeyColumns(USER_ID_COLUMN_DB);
 		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 	}
 }

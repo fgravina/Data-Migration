@@ -88,6 +88,16 @@
 		<property name="dataSource" ref="dataSourceMyGiGlobal" />		
 	</bean>
 	
+	<!-- ============================= DAO GbrProfile ================================================ -->	
+	<bean id="gbrProfileDao" class="com.gigroup.data.migration.candidate.anagrafica.dao.JdbcGbrProfileDao">
+		<property name="dataSource" ref="dataSourceMyGiGlobal" />		
+	</bean>
+	
+	<!-- ============================= DAO NOKRelationship ================================================ -->	
+	<bean id="NOKRelationshipDao" class="com.gigroup.data.migration.candidate.anagrafica.dao.JdbcNOKRelationshipDao">
+		<property name="dataSource" ref="dataSourceMyGiGlobal" />		
+	</bean>
+	
 	<!-- ============================= DAO Address ================================================ -->	
 	<bean id="addressDao" class="com.gigroup.data.migration.candidate.anagrafica.dao.JdbcAddressDao">
 		<property name="dataSource" ref="dataSourceMyGiGlobal" />		
