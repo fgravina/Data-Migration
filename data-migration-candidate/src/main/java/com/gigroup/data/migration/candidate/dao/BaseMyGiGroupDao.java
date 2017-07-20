@@ -9,6 +9,7 @@ public interface BaseMyGiGroupDao {
 	
 	public static final String GI_GROUP_BUSINESS_CODE = "GIG";
 	public static final String ITALY_COUNTRY_CODE = "ITA";
+	public static final String GBR_COUNTRY_CODE = "GBR";
 	public static final String PERSON_TYPE = "PERSON";
 	public static final String WRITING_CLAIMS_CODE = "SCR";
 	

@@ -13,4 +13,5 @@ public interface PersonCountryBusinessRoleDao extends BaseMyGiGroupDao {
      */
 	void add(final PersonCountryBusinessRole personCountryBusinessRole);
 
+	void addUK(final PersonCountryBusinessRole personCountryBusinessRole);
 }

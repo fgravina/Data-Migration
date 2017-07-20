@@ -57,6 +57,31 @@ public class JdbcPersonCountryBusinessRoleDao implements PersonCountryBusinessRo
 		
 	}
 	
+	@Override
+	public void addUK(final PersonCountryBusinessRole personCountryBusinessRole) {
+		final String methodName = "add() - ";
+		if (logger.isDebugEnabled()) {
+			logger.debug(methodName + "InputParams[personCountryBusinessRole=" + personCountryBusinessRole + "]");
+		}
+		try {			
+			SqlParameterSource parameters = new MapSqlParameterSource()
+					.addValue(PERSON_ID_COLUMN_DB, personCountryBusinessRole.getPersonId())
+					.addValue(BUSINESS_CODE_COLUMN_DB, personCountryBusinessRole.getBusinessCode() != null ? personCountryBusinessRole.getBusinessCode() : GI_GROUP_BUSINESS_CODE)
+					.addValue(COUNTRY_CODE_COLUMN_DB, personCountryBusinessRole.getCountryCode() != null ? personCountryBusinessRole.getCountryCode() : GBR_COUNTRY_CODE)
+					.addValue(CREATION_TIMESTAMP_COLUMN_DB, personCountryBusinessRole.getCreationTimestamp())
+					.addValue(CREATION_USER_COLUMN_DB, personCountryBusinessRole.getCreationUser())
+					.addValue(LAST_UPDATE_TIMESTAMP_COLUMN_DB, personCountryBusinessRole.getLastUpdateTimestamp())
+					.addValue(LAST_UPDATE_USER_COLUMN_DB, personCountryBusinessRole.getLastUpdateUser())
+					.addValue(ROLE_CODE_COLUMN_DB, personCountryBusinessRole.getRoleCode() != null ? personCountryBusinessRole.getRoleCode() : CANDIDATE_ROLE_CODE)
+					.addValue(CREATION_USER_COLUMN_DB, LIFERAY_CREATION_USER);
+			this.insertPersonCountryBusinessRole.execute(parameters);
+		} catch (DuplicateKeyException dke) {
+			throw new DataMigrationException(methodName +"The PersonCountryBusinessRole: " + personCountryBusinessRole + " is already inside database: " + dke);
+		} catch (Throwable t) {
+			throw new DataMigrationException(methodName +"Unexpected exception: " + t);
+		}
+	}
+	
 	// Injection
 	public void setDataSource(final DataSource dataSource) {
 		this.insertPersonCountryBusinessRole = new SimpleJdbcInsert(dataSource).withTableName(PERSON_COUNTRY_BUSINESS_ROLE_TABLE_NAME);	
