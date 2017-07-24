@@ -31,7 +31,17 @@ public class Person extends BaseMyGiGroupEntity {
 
 	private String loginname;
 
-	private String displayName;		
+	private String displayName;	
+	
+	private String nationalityCode;
+
+	public String getNationalityCode() {
+		return nationalityCode;
+	}
+
+	public void setNationalityCode(String nationalityCode) {
+		this.nationalityCode = nationalityCode;
+	}
 
 	public Long getPersonId() {
 		return personId;

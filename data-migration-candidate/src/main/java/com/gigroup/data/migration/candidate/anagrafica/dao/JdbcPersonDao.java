@@ -28,6 +28,7 @@ public class JdbcPersonDao implements PersonDao {
 	private static final String LOGINNAME_COLUMN_DB = "LOGINNAME";	
 	private static final String FIRSTNAME_COLUMN_DB = "NAME";	
 	private static final String PLACE_OF_BIRTH_COLUMN_DB = "PLACE_OF_BIRTH";
+	private static final String NATIONALITY_CODE = "NATIONALITY_CODE";
 	
 	
 	private static final transient Logger logger = LoggerFactory.getLogger(JdbcPersonDao.class);
@@ -55,6 +56,7 @@ public class JdbcPersonDao implements PersonDao {
 				.addValue(CREATION_USER_COLUMN_DB, person.getCreationUser())
 				.addValue(LAST_UPDATE_TIMESTAMP_COLUMN_DB, person.getLastUpdateTimestamp(), Types.TIMESTAMP)
 				.addValue(LAST_UPDATE_USER_COLUMN_DB, person.getLastUpdateUser())
+				.addValue(NATIONALITY_CODE, person.getNationalityCode())
 				.addValue(CREATION_USER_COLUMN_DB, LIFERAY_CREATION_USER);
 
 		try {			

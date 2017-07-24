@@ -29,6 +29,7 @@ import com.gigroup.data.migration.candidate.dao.NaamahUserDao;
 import com.gigroup.data.migration.candidate.util.CountryUtils;
 import com.gigroup.data.migration.candidate.util.DataMigrationException;
 import com.gigroup.data.migration.candidate.util.DateUtils;
+import com.gigroup.data.migration.candidate.util.FileOutputUtils;
 import com.gigroup.data.migration.candidate.util.FileRecoveryUtils;
 import com.gigroup.data.migration.candidate.util.LoginNotFoundException;
 import com.gigroup.data.migration.candidate.util.SpringApplicationContext;
@@ -36,23 +37,28 @@ import com.gigroup.data.migration.candidate.util.SpringApplicationContext;
 public class AnagraficaParserUK {
 
 	private static final transient Logger logger = LoggerFactory.getLogger(AnagraficaParserUK.class);
-	
+
 	public static void parseFileToDatabase(final String filename) {
-		final String methodName = "parseFileToDatabase() - ";		
-		logger.info(methodName + "filename: " + filename);	
+		final String methodName = "parseFileToDatabase() - ";
+		logger.info(methodName + "filename: " + filename);
 
 		String otherThanQuote = " [^\"] ";
 		String quotedString = String.format(" \" %s* \" ", otherThanQuote);
 		String regex = String.format(
 				"(?x) " + // enable comments, ignore white spaces
 						";                         " + // match a comma
-						"(?=                       " + // start positive look ahead
-						"  (?:                     " + // start non-capturing group 1
-						"    %s*                   " + // match 'otherThanQuote' zero or more times
+						"(?=                       " + // start positive look
+														// ahead
+						"  (?:                     " + // start non-capturing
+														// group 1
+						"    %s*                   " + // match 'otherThanQuote'
+														// zero or more times
 						"    %s                    " + // match 'quotedString'
-						"  )*                      " + // end group 1 and repeat it zero or more times
+						"  )*                      " + // end group 1 and repeat
+														// it zero or more times
 						"  %s*                     " + // match 'otherThanQuote'
-						"  $                       " + // match the end of the string
+						"  $                       " + // match the end of the
+														// string
 						")                         ", // stop positive look
 														// ahead
 				otherThanQuote, quotedString, otherThanQuote);
@@ -60,10 +66,13 @@ public class AnagraficaParserUK {
 		String line = null;
 		BufferedReader reader = null;
 
-		String filenameRecovery = "Anagrafica_Recovery_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".csv";
+		String filenameRecovery = "Anagrafica_Recovery_"
+				+ new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".csv";
+		String filenameOutput = "AnagraficaUKOuput_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date())
+				+ ".csv";
 
 		Instant start = Instant.now();
-		
+
 		boolean isError = false;
 		long counterTotal = 0L;
 		long counterSuccess = 0L;
@@ -73,7 +82,7 @@ public class AnagraficaParserUK {
 		long counterPersonCountryBusinessRole = 0L;
 		long counterAddress = 0L;
 		long counterContact = 0L;
-		
+
 		try {
 
 			Path filenamePath = Paths.get(filename);
@@ -82,8 +91,8 @@ public class AnagraficaParserUK {
 			start = Instant.now();
 			if (logger.isDebugEnabled()) {
 				logger.debug(methodName + "Start : " + start.toString());
-			}			
-			
+			}
+
 			while (reader.ready()) {
 				counterTotal++;
 				line = reader.readLine().trim();
@@ -100,59 +109,73 @@ public class AnagraficaParserUK {
 						Long userId = addNaamahUser(liferayData);
 						logger.debug("Create userId: " + userId);
 
-						// STEP TWO
-						try {
-							addPerson(userId, liferayData);
-							counterPerson++;
-						} catch (DataMigrationException dte) {
-							logger.error(methodName + "Error during parsing following line: " + line + " - caused by " + dte.getMessage(), dte);
-							isError = true;
-						}
-
-						// STEP THREE
-						try {
-							addGbrProfile(userId, liferayData);
-							counterGbrProfile++;
-						} catch (DataMigrationException dte) {
-							logger.error(methodName + "Error during parsing following line: " + line + " - caused by " + dte.getMessage(), dte);
-							isError = true;
-						}
-
-						// STEP FOUR
-						try {
-							addPersonCountryBusinessRole(userId, liferayData);
-							counterPersonCountryBusinessRole++;
-						} catch (DataMigrationException dte) {
-							logger.error(methodName + "Error during parsing following line: " + line + " - caused by " + dte.getMessage(), dte);
-							isError = true;
-						}
-
-						// STEP FIVE
-						try {
-							addAddresses(userId, liferayData);
-							counterAddress++;
-						} catch (DataMigrationException dte) {
-							logger.error(methodName + "Error during parsing following line: " + line + " - caused by " + dte.getMessage(), dte);
-							isError = true;
-						}
-
-						// STEP SIX
-						try {
-							addContacts(userId, liferayData);
-							counterContact++;
-						} catch (DataMigrationException dte) {
-							logger.error(methodName + "Error during parsing following line: " + line + " - caused by " + dte.getMessage(), dte);
-							isError = true;
-						}
-						if(isError){
-							FileRecoveryUtils.createDumpFileRecovery(line, filenameRecovery);
-							isError = false;
-						}
+						//generated new Line
+						String newLine = String.valueOf(userId).concat(line);
+						
+						 // STEP TWO
+						 try {
+						 addPerson(userId, liferayData);
+						 counterPerson++;
+						 } catch (DataMigrationException dte) {
+						 logger.error(methodName + "Error during parsing following line: " + newLine + " - caused by " +
+						 dte.getMessage(), dte);
+						 isError = true;
+						 }
+						
+						 // STEP THREE
+						 try {
+						 addGbrProfile(userId, liferayData);
+						 counterGbrProfile++;
+						 } catch (DataMigrationException dte) {
+						 logger.error(methodName + "Error during parsing following line: " + newLine + " - caused by " +
+						 dte.getMessage(), dte);
+						 isError = true;
+						 }
+						
+						 // STEP FOUR
+						 try {
+						 addPersonCountryBusinessRole(userId, liferayData);
+						 counterPersonCountryBusinessRole++;
+						 } catch (DataMigrationException dte) {
+						 logger.error(methodName + "Error during parsing following line: " + newLine + " - caused by " +
+						 dte.getMessage(), dte);
+						 isError = true;
+						 }
+						
+						 // STEP FIVE
+						 try {
+						 addAddresses(userId, liferayData);
+						 counterAddress++;
+						 } catch (DataMigrationException dte) {
+						 logger.error(methodName + "Error during parsing following line: " + newLine + " - caused by " +
+						 dte.getMessage(), dte);
+						 isError = true;
+						 }
+						
+						 // STEP SIX
+						 try {
+						 addContacts(userId, liferayData);
+						 counterContact++;
+						 } catch (DataMigrationException dte) {
+						 logger.error(methodName + "Error during parsing following line: " + newLine + " - caused by " +
+						 dte.getMessage(), dte);
+						 isError = true;
+						 }
+						 if(isError){
+						 FileRecoveryUtils.createDumpFileRecovery(newLine,
+						 filenameRecovery);
+						 isError = false;
+						 }
 						
 						counterSuccess++;
+						
+						// File Output creation
+						FileOutputUtils.createFileOutput(newLine, filenameOutput);
 					}
+
 				} catch (DataMigrationException dte) {
-					logger.error(methodName + "Error during parsing following line: " + line + " - caused by " + dte.getMessage(), dte);
+					logger.error(methodName + "Error during parsing following line: " + line + " - caused by "
+							+ dte.getMessage(), dte);
 					FileRecoveryUtils.createDumpFileRecovery(line, filenameRecovery);
 					counterError++;
 					counterTotal++;
@@ -172,7 +195,7 @@ public class AnagraficaParserUK {
 				}
 			}
 		}
-		
+
 		logger.info("**************************************************");
 		logger.info("***************** CONTATORI **********************");
 		logger.info("**************************************************");
@@ -198,21 +221,24 @@ public class AnagraficaParserUK {
 	}
 
 	private static Long addNaamahUser(final LiferayDataAnagraficaCsvUK liferayData) {
-		NaamahUserDao naamahUserDao = (NaamahUserDao) SpringApplicationContext.INSTANCE.getBean(NaamahUserDao.BEAN_NAME);
+		NaamahUserDao naamahUserDao = (NaamahUserDao) SpringApplicationContext.INSTANCE
+				.getBean(NaamahUserDao.BEAN_NAME);
 		try {
 			// Check naamahUser is already exist
 			if (naamahUserDao.getNaamahUserByLogin(liferayData.getCnEmailAddress()) != null) {
-				throw new DataMigrationException("NaamahUser with login[" + liferayData.getCnEmailAddress() + "] is already exist.");
+				throw new DataMigrationException(
+						"NaamahUser with login[" + liferayData.getCnEmailAddress() + "] is already exist.");
 			}
 		} catch (LoginNotFoundException lnfe) {
 			// ignored because it's possible add new user in Girex
-		}		
+		}
 		// Fill naamahUser bean
-		NaamahUser naamahUser = new NaamahUser(liferayData.getCnFirstName() + " " + liferayData.getCnLastName(), liferayData.getCnEmailAddress(), liferayData.getCnEmailAddress());
+		NaamahUser naamahUser = new NaamahUser(liferayData.getCnFirstName() + " " + liferayData.getCnLastName(),
+				liferayData.getCnEmailAddress(), liferayData.getCnEmailAddress());
 		// Add NaamahUser
 		return naamahUserDao.addNaamahUser(naamahUser);
 	}
-	
+
 	private static void addPerson(final Long personId, final LiferayDataAnagraficaCsvUK liferayData) {
 
 		// Fill Person bean
@@ -227,59 +253,72 @@ public class AnagraficaParserUK {
 		person.setGender(liferayData.getCnGender());
 		// Remap from local to english language
 		person.setCountryCode(CountryUtils.descriptionToIso3(liferayData.getCnBirthCountry()));
+		
+		//required new value nationalityCode 
+		person.setNationalityCode(liferayData.getCnNationalityCode());
 
 		// Add NaamahUser
 		PersonDao personDao = (PersonDao) SpringApplicationContext.INSTANCE.getBean(PersonDao.BEAN_NAME);
 		personDao.addPerson(person);
 	}
-	
-	private static void addGbrProfile(Long personId, LiferayDataAnagraficaCsvUK liferayData){
+
+	private static void addGbrProfile(Long personId, LiferayDataAnagraficaCsvUK liferayData) {
 		GbrProfile gbrProfile = new GbrProfile();
 		gbrProfile.setPersonId(personId);
-		gbrProfile.setCollaborationPortalID( ((liferayData.getCnCollaborationPortalId() != null) && (!liferayData.getCnCollaborationPortalId().isEmpty())) ? Long.parseLong(liferayData.getCnCollaborationPortalId()) : null );
+		gbrProfile.setCollaborationPortalID(((liferayData.getCnCollaborationPortalId() != null)
+				&& (!liferayData.getCnCollaborationPortalId().isEmpty()))
+						? Long.parseLong(liferayData.getCnCollaborationPortalId()) : null);
 		gbrProfile.setTaxCode(liferayData.getCnCollaborationPortalId());
 		gbrProfile.setNationality(liferayData.getCnNationality());
 		gbrProfile.setNation(liferayData.getCnNation());
 		gbrProfile.setNokName(liferayData.getCnNOKName());
 		gbrProfile.setNokContactNumber(liferayData.getCnNOKContactNumber());
-		// keep id for NOKRelationship, 'cause we receive description and id needed 
+		// keep id for NOKRelationship, 'cause we receive description and id
+		// needed
 		gbrProfile.setNokReleationship(getId4NOKDescription(liferayData.getCnNOKRelationship()));
 		gbrProfile.setStatus(liferayData.getCnStatus());
 		// Add NaamahUser
-		GbrProfileDao gbrProfileDao = (GbrProfileDao) SpringApplicationContext.INSTANCE.getBean(GbrProfileDao.BEAN_NAME);
+		GbrProfileDao gbrProfileDao = (GbrProfileDao) SpringApplicationContext.INSTANCE
+				.getBean(GbrProfileDao.BEAN_NAME);
 		gbrProfileDao.addGbrProfile(gbrProfile);
 	}
-	
-	private static Long getId4NOKDescription(String cnNOKRelationship){
+
+	private static Long getId4NOKDescription(String cnNOKRelationship) {
 		Long nokRelationshipId = null;
-		NOKRelationshipDao nokRelationshipDao = (NOKRelationshipDao) SpringApplicationContext.INSTANCE.getBean(NOKRelationshipDao.BEAN_NAME);
+		NOKRelationshipDao nokRelationshipDao = (NOKRelationshipDao) SpringApplicationContext.INSTANCE
+				.getBean(NOKRelationshipDao.BEAN_NAME);
 		try {
 			if ((cnNOKRelationship != null) && (!cnNOKRelationship.isEmpty())) {
-				nokRelationshipId = nokRelationshipDao.getNokRelationshipByDescription(cnNOKRelationship).getNokRelationshipId();
+				nokRelationshipId = nokRelationshipDao.getNokRelationshipByDescription(cnNOKRelationship)
+						.getNokRelationshipId();
 			}
 		} catch (Exception e) {
-			logger.error("Data Access Error: " + e);	
-		}		
+			logger.error("Data Access Error: " + e);
+		}
 		return nokRelationshipId;
 	}
 
 	private static void addAddresses(Long personId, LiferayDataAnagraficaCsvUK liferayData) {
 
-		addAddress(personId, liferayData.getCnDomAddress(), liferayData.getCnDomTown(), liferayData.getCnDomZipCode(), CountryUtils.descriptionToIso3(liferayData.getCnDomCountryDesc()),
-				Address.DOMICILE_ADDRESS_TYPE_ID);
+		addAddress(personId, liferayData.getCnDomAddress(), liferayData.getCnDomTown(), liferayData.getCnDomZipCode(),
+				CountryUtils.descriptionToIso3(liferayData.getCnDomCountryDesc()), Address.DOMICILE_ADDRESS_TYPE_ID);
 
 		if ("Y".equalsIgnoreCase(liferayData.getCnResComeDom())) {
-			addAddress(personId, liferayData.getCnDomAddress(), liferayData.getCnDomTown(), liferayData.getCnDomZipCode(), CountryUtils.descriptionToIso3(liferayData.getCnDomCountryDesc()),
+			addAddress(personId, liferayData.getCnDomAddress(), liferayData.getCnDomTown(),
+					liferayData.getCnDomZipCode(), CountryUtils.descriptionToIso3(liferayData.getCnDomCountryDesc()),
 					Address.RESIDENCE_ADDRESS_TYPE_ID);
 		} else {
-			addAddress(personId, liferayData.getCnResAddress(), liferayData.getCnResTown(), liferayData.getCnResZipCode(), CountryUtils.descriptionToIso3(liferayData.getCnResCountryDesc()),
+			addAddress(personId, liferayData.getCnResAddress(), liferayData.getCnResTown(),
+					liferayData.getCnResZipCode(), CountryUtils.descriptionToIso3(liferayData.getCnResCountryDesc()),
 					Address.RESIDENCE_ADDRESS_TYPE_ID);
 		}
 	}
 
-	private static void addAddress(Long personId, String address, String city, String postalCode, String countryCode, Long addressTypeId) {
+	private static void addAddress(Long personId, String address, String city, String postalCode, String countryCode,
+			Long addressTypeId) {
 
-		if (StringUtils.hasText(address) || StringUtils.hasText(city) || StringUtils.hasText(postalCode) || StringUtils.hasText(countryCode)) {
+		if (StringUtils.hasText(address) || StringUtils.hasText(city) || StringUtils.hasText(postalCode)
+				|| StringUtils.hasText(countryCode)) {
 			Address addressBean = new Address();
 			addressBean.setAddress(StringUtils.hasText(address) ? address.replace("\"", "") : "");
 			addressBean.setCity(city);
@@ -320,10 +359,10 @@ public class AnagraficaParserUK {
 		PersonCountryBusinessRole personCountryBusinessRole = new PersonCountryBusinessRole(personId);
 
 		// Add PersonCountryBusinessRoleDao
-		PersonCountryBusinessRoleDao personCountryBusinessRoleDao = (PersonCountryBusinessRoleDao) SpringApplicationContext.INSTANCE.getBean(PersonCountryBusinessRoleDao.BEAN_NAME);
+		PersonCountryBusinessRoleDao personCountryBusinessRoleDao = (PersonCountryBusinessRoleDao) SpringApplicationContext.INSTANCE
+				.getBean(PersonCountryBusinessRoleDao.BEAN_NAME);
 		personCountryBusinessRoleDao.addUK(personCountryBusinessRole);
 
 	}
-
 
 }

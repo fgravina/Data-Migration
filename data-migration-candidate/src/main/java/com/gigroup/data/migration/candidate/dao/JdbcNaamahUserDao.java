@@ -83,7 +83,8 @@ public class JdbcNaamahUserDao implements NaamahUserDao {
 					.addValue(LAST_LOGIN_COLUMN_DB, naamahUser.getLastLogin())
 					.addValue(SALT_COLUMN_DB, naamahUser.getSalt())							
 					//.addValue(USER_STATE_ID_COLUMN_DB, naamahUser.getUserState());
-					.addValue(USER_STATE_ID_COLUMN_DB, 0);								
+					.addValue(USER_STATE_ID_COLUMN_DB, 0);	
+			logger.info("JdbcNaamahUserDao.addNaamahUser: "+ parameters.toString());
 			this.insertNaamahUser.execute(parameters);
 		} catch (DuplicateKeyException dke) {
 			//logger.error(methodName +"Person with email [" + naamahUser.getEmail() + "] is already inside database: " + dke);

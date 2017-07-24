@@ -47,6 +47,17 @@ public class LiferayDataAnagraficaCsvUK {
 	private String cnNOKRelationship;
 	private String cnStatus;
 	
+	//People - Not defined yet 
+	private String cnNationalityCode;
+	
+	public String getCnNationalityCode() {
+		return cnNationalityCode;
+	}
+
+	public void setCnNationalityCode(String cnNationalityCode) {
+		this.cnNationalityCode = cnNationalityCode;
+	}
+
 	public LiferayDataAnagraficaCsvUK(){}
 	
 	public LiferayDataAnagraficaCsvUK(String[] fields){
@@ -91,6 +102,9 @@ public class LiferayDataAnagraficaCsvUK {
 		this.cnNOKContactNumber = fields[fieldName.cnNOKContactNumber.ordinal()];
 		this.cnNOKRelationship = fields[fieldName.cnNOKRelationship.ordinal()];
 		this.cnStatus = fields[fieldName.cnStatus.ordinal()];
+		
+		//People - Not defined yet 
+		this.cnNationalityCode = fields[fieldName.cnNationalityCode.ordinal()];
 				
 	}
 	
@@ -369,7 +383,8 @@ public class LiferayDataAnagraficaCsvUK {
 		cnNOKName,
 		cnNOKContactNumber,
 		cnNOKRelationship,
-		cnStatus
+		cnStatus,
+		cnNationalityCode
 	}
 
 }
